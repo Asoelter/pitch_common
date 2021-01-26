@@ -53,6 +53,33 @@ std::optional<PlayerReadyMessage> PlayerReadyMessage::deserialize(const std::vec
     return PlayerReadyMessage{};
 }
 
+std::vector<char> AcknowledgePlayerReadyMessage::serialize() const
+{
+    char buffer[size];
+
+    serializeHeader<size>(buffer, type);
+
+    return std::vector<char>(std::begin(buffer), std::end(buffer));
+}
+
+std::optional<AcknowledgePlayerReadyMessage> AcknowledgePlayerReadyMessage::deserialize(const std::vector<char>& buffer)
+{
+    if(buffer.size() != PlayerReadyMessage::size)
+    {
+        return std::optional<AcknowledgePlayerReadyMessage>();
+    }
+
+    const uint16_t messageSize = (buffer[0] << CHAR_BIT) & buffer[1];
+    const uint16_t messageType = (buffer[2] << CHAR_BIT) & buffer[3];
+
+    if(messageSize != PlayerReadyMessage::size || messageType != PlayerReadyMessage::type)
+    {
+        return std::optional<AcknowledgePlayerReadyMessage>();
+    }
+
+    return AcknowledgePlayerReadyMessage{};
+}
+
 std::vector<char> PlayedCardMessage::serialize() const
 {
     static_assert(sizeof(CardSuit) == 1 , "Card::Suit has gotten too large");
@@ -92,6 +119,11 @@ std::optional<PlayedCardMessage> PlayedCardMessage::deserialize(const std::vecto
 std::string MessageToString::operator()(const PlayerReadyMessage& message)
 {
     return "Player reader";
+}
+
+std::string MessageToString::operator()(const AcknowledgePlayerReadyMessage& message)
+{
+    return "Acknowledge player ready";
 }
 
 std::string MessageToString::operator()(const PlayedCardMessage& message)

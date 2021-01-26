@@ -18,6 +18,7 @@ namespace
 enum class MessageId : uint16_t
 {
     PlayerReady,
+    AcknowledgePlayerReady,
     PlayedCard
 };
 
@@ -28,6 +29,15 @@ struct PlayerReadyMessage
 
     static constexpr StandardChunkType size = headerSize;
     static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::PlayerReady);
+};
+
+struct AcknowledgePlayerReadyMessage
+{
+    std::vector<char> serialize() const;
+    static std::optional<AcknowledgePlayerReadyMessage> deserialize(const std::vector<char>& buffer);
+
+    static constexpr StandardChunkType size = headerSize;
+    static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::AcknowledgePlayerReady);
 };
 
 struct PlayedCardMessage
@@ -48,6 +58,7 @@ struct PlayedCardMessage
 struct MessageToString
 {
     std::string operator()(const PlayerReadyMessage& message);
+    std::string operator()(const AcknowledgePlayerReadyMessage& message);
     std::string operator()(const PlayedCardMessage& message);
 };
 
