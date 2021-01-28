@@ -26,58 +26,57 @@ void serializeHeader(char buffer[BufferSize], StandardChunkType type)
     buffer[3] = secondByte(type);
 }
 
-std::vector<char> PlayerReadyMessage::serialize() const
+template<typename MessageType>
+std::vector<char> serializeHeader()
 {
-    char buffer[size];
+    std::vector<char> result;
+    result.reserve(MessageType::size);
 
-    serializeHeader<size>(buffer, type);
+    result.push_back(firstByte(MessageType::size));
+    result.push_back(secondByte(MessageType::size));
+    result.push_back(firstByte(MessageType::type));
+    result.push_back(secondByte(MessageType::type));
 
-    return std::vector<char>(std::begin(buffer), std::end(buffer));
+    return result;
 }
 
-std::optional<PlayerReadyMessage> PlayerReadyMessage::deserialize(const std::vector<char>& buffer)
+template<typename MessageType>
+std::optional<MessageType> deserializeHeaderOnlyMessage(const std::vector<char>& buffer)
 {
-    if(buffer.size() != PlayerReadyMessage::size)
+    if(buffer.size() != MessageType::size)
     {
-        return std::optional<PlayerReadyMessage>();
+        return std::optional<MessageType>();
     }
 
     const uint16_t size = (buffer[0] << CHAR_BIT) & buffer[1];
     const uint16_t messageType = (buffer[2] << CHAR_BIT) & buffer[3];
 
-    if(size != PlayerReadyMessage::size || messageType != PlayerReadyMessage::type)
+    if(size != MessageType::size || messageType != MessageType::type)
     {
-        return std::optional<PlayerReadyMessage>();
+        return std::optional<MessageType>();
     }
 
-    return PlayerReadyMessage{};
+    return MessageType{};
+}
+
+std::vector<char> PlayerReadyMessage::serialize() const
+{
+    return serializeHeader<PlayerReadyMessage>();
+}
+
+std::optional<PlayerReadyMessage> PlayerReadyMessage::deserialize(const std::vector<char>& buffer)
+{
+    return deserializeHeaderOnlyMessage<PlayerReadyMessage>(buffer);
 }
 
 std::vector<char> AcknowledgePlayerReadyMessage::serialize() const
 {
-    char buffer[size];
-
-    serializeHeader<size>(buffer, type);
-
-    return std::vector<char>(std::begin(buffer), std::end(buffer));
+    return serializeHeader<AcknowledgePlayerReadyMessage>();
 }
 
 std::optional<AcknowledgePlayerReadyMessage> AcknowledgePlayerReadyMessage::deserialize(const std::vector<char>& buffer)
 {
-    if(buffer.size() != PlayerReadyMessage::size)
-    {
-        return std::optional<AcknowledgePlayerReadyMessage>();
-    }
-
-    const uint16_t messageSize = (buffer[0] << CHAR_BIT) | buffer[1];
-    const uint16_t messageType = (buffer[2] << CHAR_BIT) | buffer[3];
-
-    if(messageSize != AcknowledgePlayerReadyMessage::size || messageType != AcknowledgePlayerReadyMessage::type)
-    {
-        return std::optional<AcknowledgePlayerReadyMessage>();
-    }
-
-    return AcknowledgePlayerReadyMessage{};
+    return deserializeHeaderOnlyMessage<AcknowledgePlayerReadyMessage>(buffer);
 }
 
 std::vector<char> PlayedCardMessage::serialize() const
@@ -113,6 +112,16 @@ std::optional<PlayedCardMessage> PlayedCardMessage::deserialize(const std::vecto
     const auto number = static_cast<CardNumber>(buffer[5]);
 
     return PlayedCardMessage(suit, number);
+}
+
+std::vector<char> PromptBidMessage::serialize() const
+{
+    return serializeHeader<PromptBidMessage>();
+}
+
+std::optional<PromptBidMessage> PromptBidMessage::deserialize(const std::vector<char>& buffer)
+{
+    return deserializeHeaderOnlyMessage<PromptBidMessage>(buffer);
 }
 
 //NOTE: These should eventually be moved to another file (message operations.*?)

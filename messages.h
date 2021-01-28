@@ -19,7 +19,8 @@ enum class MessageId : uint16_t
 {
     PlayerReady,
     AcknowledgePlayerReady,
-    PlayedCard
+    PlayedCard,
+    PromptBid
 };
 
 struct PlayerReadyMessage
@@ -52,6 +53,15 @@ struct PlayedCardMessage
 
     CardSuit   suit;
     CardNumber number;
+};
+
+struct PromptBidMessage
+{
+    std::vector<char> serialize() const;
+    static std::optional<PromptBidMessage> deserialize(const std::vector<char>& buffer);
+
+    static constexpr StandardChunkType size = headerSize;
+    static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::PromptBid);
 };
 
 //NOTE: These should eventually be moved to another file (message operations.*?)
