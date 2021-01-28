@@ -62,6 +62,13 @@ struct MessageToString
     std::string operator()(const PlayedCardMessage& message);
 };
 
-using Message = std::variant<PlayerReadyMessage, PlayedCardMessage>;
+struct ExtractId
+{
+    MessageId operator()(const PlayerReadyMessage& message);
+    MessageId operator()(const AcknowledgePlayerReadyMessage& message);
+    MessageId operator()(const PlayedCardMessage& message);
+};
+
+using Message = std::variant<PlayerReadyMessage, AcknowledgePlayerReadyMessage, PlayedCardMessage>;
 
 #endif //MESSAGES_H

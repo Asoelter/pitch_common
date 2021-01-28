@@ -69,10 +69,10 @@ std::optional<AcknowledgePlayerReadyMessage> AcknowledgePlayerReadyMessage::dese
         return std::optional<AcknowledgePlayerReadyMessage>();
     }
 
-    const uint16_t messageSize = (buffer[0] << CHAR_BIT) & buffer[1];
-    const uint16_t messageType = (buffer[2] << CHAR_BIT) & buffer[3];
+    const uint16_t messageSize = (buffer[0] << CHAR_BIT) | buffer[1];
+    const uint16_t messageType = (buffer[2] << CHAR_BIT) | buffer[3];
 
-    if(messageSize != PlayerReadyMessage::size || messageType != PlayerReadyMessage::type)
+    if(messageSize != AcknowledgePlayerReadyMessage::size || messageType != AcknowledgePlayerReadyMessage::type)
     {
         return std::optional<AcknowledgePlayerReadyMessage>();
     }
@@ -96,15 +96,15 @@ std::vector<char> PlayedCardMessage::serialize() const
 
 std::optional<PlayedCardMessage> PlayedCardMessage::deserialize(const std::vector<char>& buffer)
 {
-    if(buffer.size() != PlayerReadyMessage::size)
+    if(buffer.size() != PlayedCardMessage::size)
     {
         return std::optional<PlayedCardMessage>();
     }
 
-    const uint16_t MessageSize = (buffer[0] << CHAR_BIT) & buffer[1];
-    const uint16_t messageType = (buffer[2] << CHAR_BIT) & buffer[3];
+    const uint16_t MessageSize = (buffer[0] << CHAR_BIT) | buffer[1];
+    const uint16_t messageType = (buffer[2] << CHAR_BIT) | buffer[3];
 
-    if(MessageSize != PlayerReadyMessage::size || messageType != PlayerReadyMessage::type)
+    if(MessageSize != PlayedCardMessage::size || messageType != PlayedCardMessage::type)
     {
         return std::optional<PlayedCardMessage>();
     }
@@ -128,5 +128,20 @@ std::string MessageToString::operator()(const AcknowledgePlayerReadyMessage& mes
 
 std::string MessageToString::operator()(const PlayedCardMessage& message)
 {
-    return "Played Card ";
+    return "Played Card: " + toString(message.number) + " of " + toString(message.suit);
+}
+
+MessageId ExtractId::operator()(const PlayerReadyMessage& message)
+{
+    return static_cast<MessageId>(message.type);
+}
+
+MessageId ExtractId::operator()(const AcknowledgePlayerReadyMessage& message)
+{
+    return static_cast<MessageId>(message.type);
+}
+
+MessageId ExtractId::operator()(const PlayedCardMessage& message)
+{
+    return static_cast<MessageId>(message.type);
 }

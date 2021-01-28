@@ -22,6 +22,9 @@ public:
     std::optional<Message> popMessage() noexcept;
 
 private:
+    void translateAllRawMessages();
+
+private:
     std::vector<char>   rawMessageBuffer_;
     std::queue<Message> messageBuffer_;
 };
