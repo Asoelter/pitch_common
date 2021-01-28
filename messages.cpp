@@ -48,8 +48,8 @@ std::optional<MessageType> deserializeHeaderOnlyMessage(const std::vector<char>&
         return std::optional<MessageType>();
     }
 
-    const uint16_t size = (buffer[0] << CHAR_BIT) & buffer[1];
-    const uint16_t messageType = (buffer[2] << CHAR_BIT) & buffer[3];
+    const uint16_t size = (buffer[0] << CHAR_BIT) | buffer[1];
+    const uint16_t messageType = (buffer[2] << CHAR_BIT) | buffer[3];
 
     if(size != MessageType::size || messageType != MessageType::type)
     {
@@ -140,6 +140,11 @@ std::string MessageToString::operator()(const PlayedCardMessage& message)
     return "Played Card: " + toString(message.number) + " of " + toString(message.suit);
 }
 
+std::string MessageToString::operator()(const PromptBidMessage& message)
+{
+    return "Prompt bid message";
+}
+
 MessageId ExtractId::operator()(const PlayerReadyMessage& message)
 {
     return static_cast<MessageId>(message.type);
@@ -151,6 +156,11 @@ MessageId ExtractId::operator()(const AcknowledgePlayerReadyMessage& message)
 }
 
 MessageId ExtractId::operator()(const PlayedCardMessage& message)
+{
+    return static_cast<MessageId>(message.type);
+}
+
+MessageId ExtractId::operator()(const PromptBidMessage& message)
 {
     return static_cast<MessageId>(message.type);
 }

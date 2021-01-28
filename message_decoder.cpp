@@ -1,5 +1,8 @@
 #include "message_decoder.h"
 
+#include <cassert>
+#include <stdexcept>
+
 void MessageDecoder::addMessageChunk(const std::vector<char>& buffer) noexcept
 {
     rawMessageBuffer_.insert(rawMessageBuffer_.end(), buffer.begin(), buffer.end());
@@ -35,46 +38,29 @@ void MessageDecoder::translateAllRawMessages()
         const auto exactMessageBuffer = std::vector<char>(messageBegin, messageEnd);
         auto bytesRead = 0;
 
+        #define DESERIALIZE_MESSAGE(msgName)                                                            \
+            case MessageId::msgName:                                                                    \
+            {                                                                                           \
+                const auto possibleDecodedMessage = msgName##Message::deserialize(exactMessageBuffer);  \
+                if(possibleDecodedMessage)                                                              \
+                {                                                                                       \
+                    messageBuffer_.push(possibleDecodedMessage.value());                                \
+                }                                                                                       \
+                                                                                                        \
+                bytesRead = msgName##Message::size;                                                     \
+            }break;                                                                                     \
+
         switch(messageId)
         {
-            case MessageId::PlayerReady:
-            {
-                const auto possibleDecodedMessage = PlayerReadyMessage::deserialize(exactMessageBuffer);
-
-                if(possibleDecodedMessage)
-                {
-                    messageBuffer_.push(possibleDecodedMessage.value());
-                }
-
-                bytesRead = PlayerReadyMessage::size;
-
-            } break;
-            case MessageId::AcknowledgePlayerReady:
-            {
-                const auto possibleDecodedMessage = AcknowledgePlayerReadyMessage::deserialize(exactMessageBuffer);
-
-                if(possibleDecodedMessage)
-                {
-                    messageBuffer_.push(possibleDecodedMessage.value());
-                }
-
-                bytesRead = AcknowledgePlayerReadyMessage::size;
-
-            } break;
-            case MessageId::PlayedCard:
-            {
-                const auto possibleDecodedMessage = PlayedCardMessage::deserialize(exactMessageBuffer);
-
-                if(possibleDecodedMessage)
-                {
-                    messageBuffer_.push(possibleDecodedMessage.value());
-                }
-
-                bytesRead = PlayedCardMessage::size;
-
-            } break;
+            DESERIALIZE_MESSAGE(PlayerReady);
+            DESERIALIZE_MESSAGE(AcknowledgePlayerReady);
+            DESERIALIZE_MESSAGE(PlayedCard);
+            DESERIALIZE_MESSAGE(PromptBid);
+            default: throw std::runtime_error("unknown message type");
         }
 
         rawMessageBuffer_.erase(rawMessageBuffer_.begin(), rawMessageBuffer_.begin() + bytesRead);
     }
 }
+
+#undef DESERIALIZE_MESSAGE
