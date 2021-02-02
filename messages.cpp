@@ -193,6 +193,11 @@ std::string MessageToString::operator()(const AcknowledgePlayerReadyMessage& mes
     return "Acknowledge player ready";
 }
 
+std::string MessageToString::operator()(const PromptPlayCardMessage& message)
+{
+    return "Prompt play card";
+}
+
 std::string MessageToString::operator()(const PlayedCardMessage& message)
 {
     return "Played Card: " + toString(message.number) + " of " + toString(message.suit);

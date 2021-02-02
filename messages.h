@@ -125,14 +125,4 @@ using Message = std::variant<
 #undef X
 >;
 
-#if 0
-using Message = std::variant<
-    PlayerReadyMessage,
-    AcknowledgePlayerReadyMessage,
-    PlayedCardMessage,
-    PromptBidMessage,
-    BidMessage
->;
-#endif
-
 #endif //MESSAGES_H
