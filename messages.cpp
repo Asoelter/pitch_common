@@ -59,6 +59,25 @@ std::optional<MessageType> deserializeHeaderOnlyMessage(const std::vector<char>&
     return MessageType{};
 }
 
+template<typename MessageType>
+bool verifyHeader(const std::vector<char>& buffer)
+{
+    if(buffer.size() != MessageType::size)
+    {
+        return false;
+    }
+
+    const uint16_t size = (buffer[0] << CHAR_BIT) | buffer[1];
+    const uint16_t messageType = (buffer[2] << CHAR_BIT) | buffer[3];
+
+    if(size != MessageType::size || messageType != MessageType::type)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 std::vector<char> PlayerReadyMessage::serialize() const
 {
     return serializeHeader<PlayerReadyMessage>();
@@ -122,6 +141,35 @@ std::vector<char> PromptBidMessage::serialize() const
 std::optional<PromptBidMessage> PromptBidMessage::deserialize(const std::vector<char>& buffer)
 {
     return deserializeHeaderOnlyMessage<PromptBidMessage>(buffer);
+}
+
+std::vector<char> BidMessage::serialize() const
+{
+    static_assert(sizeof(Bid) == 1, "Bid enum has gotten too large");
+
+    auto buffer = serializeHeader<BidMessage>();
+    buffer.push_back(static_cast<char>(bid));
+
+    return buffer;
+}
+
+std::optional<BidMessage> BidMessage::deserialize(const std::vector<char>& buffer)
+{
+    if(!verifyHeader<BidMessage>(buffer))
+    {
+        return std::optional<BidMessage>();
+    }
+
+    const auto possibleBid = static_cast<uint8_t>(buffer.back());
+
+    if(possibleBid < static_cast<uint8_t>(Bid::Two) || possibleBid > static_cast<uint8_t>(Bid::Shoot))
+    {
+        return std::optional<BidMessage>();
+    }
+
+    const auto bid = static_cast<Bid>(buffer.back());
+
+    return BidMessage(bid);
 }
 
 //NOTE: These should eventually be moved to another file (message operations.*?)

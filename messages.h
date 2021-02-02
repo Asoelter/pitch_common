@@ -7,6 +7,7 @@
 #include <variant>
 #include <vector>
 
+#include "bid.h"
 #include "card_enums.h"
 
 namespace
@@ -20,7 +21,8 @@ enum class MessageId : uint16_t
     PlayerReady,
     AcknowledgePlayerReady,
     PlayedCard,
-    PromptBid
+    PromptBid,
+    Bid
 };
 
 struct PlayerReadyMessage
@@ -62,6 +64,19 @@ struct PromptBidMessage
 
     static constexpr StandardChunkType size = headerSize;
     static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::PromptBid);
+};
+
+struct BidMessage
+{
+    BidMessage(Bid b) : bid(b) {}
+
+    std::vector<char> serialize() const;
+    static std::optional<BidMessage> deserialize(const std::vector<char>& buffer);
+
+    static constexpr StandardChunkType size = headerSize + sizeof(Bid);
+    static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::PromptBid);
+
+    Bid bid;
 };
 
 //NOTE: These should eventually be moved to another file (message operations.*?)
