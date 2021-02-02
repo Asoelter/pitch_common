@@ -60,6 +60,7 @@ void MessageDecoder::translateAllRawMessages()
             DESERIALIZE_MESSAGE(AcknowledgePlayerReady);
             DESERIALIZE_MESSAGE(PlayedCard);
             DESERIALIZE_MESSAGE(PromptBid);
+            DESERIALIZE_MESSAGE(Bid);
             default: throw std::runtime_error("unknown message type");
         }
 

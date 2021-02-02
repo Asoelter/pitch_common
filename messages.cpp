@@ -193,6 +193,11 @@ std::string MessageToString::operator()(const PromptBidMessage& message)
     return "Prompt bid message";
 }
 
+std::string MessageToString::operator()(const BidMessage& message)
+{
+    return "Bid message";
+}
+
 MessageId ExtractId::operator()(const PlayerReadyMessage& message)
 {
     return static_cast<MessageId>(message.type);
@@ -209,6 +214,11 @@ MessageId ExtractId::operator()(const PlayedCardMessage& message)
 }
 
 MessageId ExtractId::operator()(const PromptBidMessage& message)
+{
+    return static_cast<MessageId>(message.type);
+}
+
+MessageId ExtractId::operator()(const BidMessage& message)
 {
     return static_cast<MessageId>(message.type);
 }
