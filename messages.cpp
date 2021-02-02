@@ -198,27 +198,14 @@ std::string MessageToString::operator()(const BidMessage& message)
     return "Bid message";
 }
 
-MessageId ExtractId::operator()(const PlayerReadyMessage& message)
-{
-    return static_cast<MessageId>(message.type);
-}
+#define IMPLEMENT_EXTRACT_ID(msgType)                                   \
+    MessageId ExtractId::operator()(const msgType##Message& message)    \
+    {                                                                   \
+        return static_cast<MessageId>(message.type);                    \
+    }                                                                   \
 
-MessageId ExtractId::operator()(const AcknowledgePlayerReadyMessage& message)
-{
-    return static_cast<MessageId>(message.type);
-}
-
-MessageId ExtractId::operator()(const PlayedCardMessage& message)
-{
-    return static_cast<MessageId>(message.type);
-}
-
-MessageId ExtractId::operator()(const PromptBidMessage& message)
-{
-    return static_cast<MessageId>(message.type);
-}
-
-MessageId ExtractId::operator()(const BidMessage& message)
-{
-    return static_cast<MessageId>(message.type);
-}
+#define X(msgType) IMPLEMENT_EXTRACT_ID(msgType)
+#   include "messages.inc"
+#undef IMPLEMENT_EXTRACT_ID
+#undef X
+    

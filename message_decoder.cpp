@@ -56,16 +56,13 @@ void MessageDecoder::translateAllRawMessages()
 
         switch(messageId)
         {
-            DESERIALIZE_MESSAGE(PlayerReady);
-            DESERIALIZE_MESSAGE(AcknowledgePlayerReady);
-            DESERIALIZE_MESSAGE(PlayedCard);
-            DESERIALIZE_MESSAGE(PromptBid);
-            DESERIALIZE_MESSAGE(Bid);
+            #define X(msgType) DESERIALIZE_MESSAGE(msgType)
+                #include "messages.inc"
+            #undef X
+            #undef DESERIALIZE_MESSAGE
             default: throw std::runtime_error("unknown message type");
         }
 
         rawMessageBuffer_.erase(rawMessageBuffer_.begin(), rawMessageBuffer_.begin() + bytesRead);
     }
 }
-
-#undef DESERIALIZE_MESSAGE

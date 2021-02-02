@@ -18,11 +18,11 @@ namespace
 
 enum class MessageId : uint16_t
 {
-    PlayerReady,
-    AcknowledgePlayerReady,
-    PlayedCard,
-    PromptBid,
-    Bid
+#define DECLARE_MESSAGE_ENUM(msgType) msgType##,
+#define X(msgType) DECLARE_MESSAGE_ENUM(msgType)
+    #include "messages.inc"
+#undef X
+#undef DECLARE_MESSAGE_ENUM
 };
 
 struct PlayerReadyMessage
@@ -82,22 +82,41 @@ struct BidMessage
 //NOTE: These should eventually be moved to another file (message operations.*?)
 struct MessageToString
 {
-    std::string operator()(const PlayerReadyMessage& message);
-    std::string operator()(const AcknowledgePlayerReadyMessage& message);
-    std::string operator()(const PlayedCardMessage& message);
-    std::string operator()(const PromptBidMessage& message);
-    std::string operator()(const BidMessage& message);
+#define DECLARED_MESSAGE_TO_STRING(msgType) std::string operator()(const msgType##Message& message);
+#define X(msgType) DECLARED_MESSAGE_TO_STRING(msgType)
+    #include "messages.inc"
+#undef DECLARED_MESSAGE_TO_STRING
+#undef X
 };
 
 struct ExtractId
 {
-    MessageId operator()(const PlayerReadyMessage& message);
-    MessageId operator()(const AcknowledgePlayerReadyMessage& message);
-    MessageId operator()(const PlayedCardMessage& message);
-    MessageId operator()(const PromptBidMessage& message);
-    MessageId operator()(const BidMessage& message);
+#define DECLARED_EXTRACT_ID(msgType) MessageId operator()(const msgType##Message& message);
+#define X(msgType) DECLARED_EXTRACT_ID(msgType)
+    #include "messages.inc"
+#undef DECLARED_EXTRACT_ID
+#undef X
 };
 
+using Message = std::variant<
+#define EXCLUDE_LAST
+#define ADD_TO_MESSAGE_VARIANT(msgType) msgType##Message,
+#define X(msgType) ADD_TO_MESSAGE_VARIANT(msgType)
+    #include "messages.inc"
+#undef EXCLUDE_LAST
+#undef ADD_TO_MESSAGE_VARIANT
+#undef X
+
+#define EXCLUDE_ALL_BUT_LAST
+#define ADD_TO_MESSAGE_VARIANT(msgType) msgType##Message
+#define X(msgType) ADD_TO_MESSAGE_VARIANT(msgType)
+    #include "messages.inc"
+#undef EXCLUDE_ALL_BUT_LAST
+#undef ADD_TO_MESSAGE_VARIANT
+#undef X
+>;
+
+#if 0
 using Message = std::variant<
     PlayerReadyMessage,
     AcknowledgePlayerReadyMessage,
@@ -105,5 +124,6 @@ using Message = std::variant<
     PromptBidMessage,
     BidMessage
 >;
+#endif
 
 #endif //MESSAGES_H
