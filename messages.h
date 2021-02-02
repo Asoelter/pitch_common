@@ -43,6 +43,15 @@ struct AcknowledgePlayerReadyMessage
     static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::AcknowledgePlayerReady);
 };
 
+struct PromptPlayCardMessage
+{
+    std::vector<char> serialize() const;
+    static std::optional<PromptPlayCardMessage> deserialize(const std::vector<char>& buffer);
+
+    static constexpr StandardChunkType size = headerSize;
+    static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::PromptPlayCard);
+};
+
 struct PlayedCardMessage
 {
     PlayedCardMessage(CardSuit s, CardNumber n) : suit(s), number(n) {}

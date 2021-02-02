@@ -98,6 +98,16 @@ std::optional<AcknowledgePlayerReadyMessage> AcknowledgePlayerReadyMessage::dese
     return deserializeHeaderOnlyMessage<AcknowledgePlayerReadyMessage>(buffer);
 }
 
+std::vector<char> PromptPlayCardMessage::serialize() const
+{
+    return serializeHeader<PromptPlayCardMessage>();
+}
+
+std::optional<PromptPlayCardMessage> PromptPlayCardMessage::deserialize(const std::vector<char>& buffer)
+{
+    return deserializeHeaderOnlyMessage<PromptPlayCardMessage>(buffer);
+}
+
 std::vector<char> PlayedCardMessage::serialize() const
 {
     static_assert(sizeof(CardSuit) == 1 , "Card::Suit has gotten too large");
