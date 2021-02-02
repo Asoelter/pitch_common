@@ -28,7 +28,7 @@ void MessageDecoder::translateAllRawMessages()
 {
     constexpr auto minMessageSize = 4;
 
-    while(rawMessageBuffer_.size() > minMessageSize)
+    while(rawMessageBuffer_.size() >= minMessageSize)
     {
         const uint16_t messageSize = (rawMessageBuffer_[0] << CHAR_BIT) | (rawMessageBuffer_[1]);
         const uint16_t rawMessageId = (rawMessageBuffer_[2] << CHAR_BIT) | (rawMessageBuffer_[3]);
@@ -45,6 +45,10 @@ void MessageDecoder::translateAllRawMessages()
                 if(possibleDecodedMessage)                                                              \
                 {                                                                                       \
                     messageBuffer_.push(possibleDecodedMessage.value());                                \
+                }                                                                                       \
+                else                                                                                    \
+                {                                                                                       \
+                    throw std::runtime_error("unable to deserialize buffer");                           \
                 }                                                                                       \
                                                                                                         \
                 bytesRead = msgName##Message::size;                                                     \
