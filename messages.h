@@ -83,7 +83,7 @@ struct BidMessage
     static std::optional<BidMessage> deserialize(const std::vector<char>& buffer);
 
     static constexpr StandardChunkType size = headerSize + sizeof(Bid);
-    static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::PromptBid);
+    static constexpr StandardChunkType type = static_cast<uint16_t>(MessageId::Bid);
 
     Bid bid;
 };
